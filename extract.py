@@ -1,17 +1,21 @@
 from tika import parser
-raw = parser.from_file('2Ben.pdf')
-text = raw['content'].split(" ")
-print(text)
-chaine = str()
-bool = True
-for i in text:
-    if i[:5] == '\n\n•':
-        bool = False
-    elif i[:4] == '\n\n':
-        bool = True
-    if bool:
-        chaine += i
-print(chaine)
+import os
+
+def simpifierCV(textCV):
+    textCV = textCV['content'].split("\n\n")
+    chaine = []
+    for i in textCV:
+        len = sum(j.isalpha() for j in i )
+        if 1 < len and len < 50 and i[0].isupper():
+            chaine += i
+    return chaine
+
+for element in os.listdir(r'C:\Users/augus/PycharmProjects/hackathon/CVs'):
+    parsed = parser.from_file(r'C:\Users/augus/PycharmProjects/hackathon/CVs/' + element)
+    print(simpifierCV(parsed))
+
+
+
 
 
 
