@@ -19,15 +19,15 @@ keyWords = {}
 wordsCount = {}
 
 def scanCV(dirs) :
+    '''Scanne les fichiers et enregistre dans un dictionnaire chacun des mots et leurs nombres d'apparition'''
     for file in dirs :
         if "pdf" in file :     
-            raw = parser.from_file(r"C:\Users\Yakiimo\Desktop\Hackathon CV\CV\Resume&Job_Description\Original_Resumes\\"+file)
-            print(raw['content'])
-            print("\n\n")
+            raw = parser.from_file(path + "\\" + file)
             text = raw['content'].lower().split()
             countWords(text)
 
 def countWords(text) :
+    '''Ajoute 1 a la valeur de la cle correspondante dans le dictionnaire ou cree la cle si inexistante'''
     for word in text :
         if word in wordsCount.keys() :
             wordsCount[word]+=1
@@ -35,29 +35,47 @@ def countWords(text) :
             wordsCount[word]=1
             
 def updateKeyWords() :
+    '''Met a jour la liste des mots cles s'ils sont apparus plus d'une fois et n'appartiennent pas a la liste des mots a exclure'''
     for word in wordsCount.keys() :
         if wordsCount[word] >= 10 and not word in excludedWords :
             keyWords[word] = [wordsCount[word]]
             
 def displayWordsOccurrences() :
+    '''Affiche les mots tries selon leurs nombres d'apparition'''
     for word in sorted(wordsCount, key=wordsCount.get, reverse=True):
         if wordsCount[word] > 10 and not word in excludedWords :
             print(word, wordsCount[word])
             
-def importance(words,CV):
+def importance(text):
+    '''Calcule le score d'un CV en fonction des mots trouves a l'interieur'''
     score=0
-    parsed = parser.from_file(CV)
-    CV_coupe = parsed["content"].split()
-    for word in words.keys(): #pour chaque mots du dico des mots-clés, recuperer l'occurrrence dans le cv, le multiplier par ln(la valeur) et ajouter à la note
-        if words.get(word,0)[0] == 0 or CV_coupe.count(word) ==0:
+    for word in keyWords.keys(): #pour chaque mot du dico des mots-cles, recuperer l'occurrrence dans le cv, le multiplier par ln(la valeur) et ajouter à la note
+        if keyWords.get(word,0)[0] == 0 or text.count(word) == 0:
             continue
-        score = score + math.log(CV_coupe.count(word)*words.get(word,0)[0])
+        score = score + math.log(text.count(word)*keyWords.get(word,0)[0])
     return score
 
+def getScores(dirs):
+    '''Calcule les scores de tous les CV'''
+    for file in dirs :
+        if "pdf" in file :     
+            raw = parser.from_file(path + "\\" + file)
+            text = raw['content'].lower().split()
+            print(file + "\t\t" + str(importance(text)))
+            
+def simplifierCV(textCV):
+    textCV = textCV['content'].split("\n\n")
+    chaine = []
+    for i in textCV:
+        len = sum(j.isalpha() for j in i )
+        if 1 < len and len < 50 and i[0].isupper():
+            chaine += i
+    return chaine
             
 scanCV(dirs)
-print(wordsCount)
+# print(wordsCount)
 updateKeyWords()
-print(keyWords)
-displayWordsOccurrences()
+# print(keyWords)
+# displayWordsOccurrences()
+getScores(dirs)
 
