@@ -18,6 +18,13 @@ excludedWords = ["or", "and", "with", "from", "of", "any", "to", "for", "-", "by
 keyWords = {}
 wordsCount = {}
 
+def countCV(dirs) :
+    count = 0
+    for file in dirs :
+        if "pdf" in file :
+            count += 1
+    return count
+
 def scanCV(dirs) :
     '''Scanne les fichiers et enregistre dans un dictionnaire chacun des mots et leurs nombres d'apparition'''
     for file in dirs :
@@ -43,7 +50,7 @@ def updateKeyWords() :
 def displayWordsOccurrences() :
     '''Affiche les mots tries selon leurs nombres d'apparition'''
     for word in sorted(wordsCount, key=wordsCount.get, reverse=True):
-        if wordsCount[word] > 10 and not word in excludedWords :
+        if wordsCount[word] >= 10 and not word in excludedWords :
             print(word, wordsCount[word])
             
 def importance(text):
@@ -57,25 +64,20 @@ def importance(text):
 
 def getScores(dirs):
     '''Calcule les scores de tous les CV'''
+    scores = {}
     for file in dirs :
         if "pdf" in file :     
             raw = parser.from_file(path + "\\" + file)
             text = raw['content'].lower().split()
-            print(file + "\t\t" + str(importance(text)))
-            
-def simplifierCV(textCV):
-    textCV = textCV['content'].split("\n\n")
-    chaine = []
-    for i in textCV:
-        len = sum(j.isalpha() for j in i )
-        if 1 < len and len < 50 and i[0].isupper():
-            chaine += i
-    return chaine
+            scores[file] = importance(text)
+    for file in sorted(scores, key=scores.get, reverse=True):
+        print(file + "\t\t" + str(scores[file]))
+    
             
 scanCV(dirs)
 # print(wordsCount)
 updateKeyWords()
-# print(keyWords)
+print(keyWords)
 # displayWordsOccurrences()
 getScores(dirs)
 
