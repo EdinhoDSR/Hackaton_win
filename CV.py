@@ -8,6 +8,7 @@ Created on Sat Feb  1 13:14:01 2020
 import os
 import math
 from tika import parser
+from tkinter import *
 path = r"C:\Users\Yakiimo\Desktop\Hackathon CV\CV\Resume&Job_Description\Original_Resumes"
 dirs = os.listdir(path)
 
@@ -45,7 +46,7 @@ def updateKeyWords() :
     '''Met a jour la liste des mots cles s'ils sont apparus plus d'une fois et n'appartiennent pas a la liste des mots a exclure'''
     for word in wordsCount.keys() :
         if wordsCount[word] >= 10 and not word in excludedWords :
-            keyWords[word] = [wordsCount[word]]
+            keyWords[word] = 0
             
 def displayWordsOccurrences() :
     '''Affiche les mots tries selon leurs nombres d'apparition'''
@@ -57,9 +58,9 @@ def importance(text):
     '''Calcule le score d'un CV en fonction des mots trouves a l'interieur'''
     score=0
     for word in keyWords.keys(): #pour chaque mot du dico des mots-cles, recuperer l'occurrrence dans le cv, le multiplier par ln(la valeur) et ajouter à la note
-        if keyWords.get(word,0)[0] == 0 or text.count(word) == 0:
+        if keyWords.get(word,0) == 0 or text.count(word) == 0:
             continue
-        score = score + math.log(text.count(word)*keyWords.get(word,0)[0])
+        score = score + math.log(text.count(word)*keyWords.get(word,0))
     return score
 
 def getScores(dirs):
@@ -80,4 +81,24 @@ updateKeyWords()
 print(keyWords)
 # displayWordsOccurrences()
 getScores(dirs)
+
+
+fenetre = Tk()
+
+titre = Label(fenetre, text = "Gestion des CVs")
+evalCV = Button(fenetre, text = "Évaluer des CVs")
+scales_dict = {}
+
+for word in keyWords :
+    scales_dict[word]= Scale(fenetre, orient='horizontal', from_=0, to=10,
+      resolution=0.1, tickinterval=2, length=350, variable = word+"_var",
+      label=word, command = lambda word=word : keyWords[word] = word+"_var")
+    
+for scale in scales_dict :
+    scale.pack()
+    
+titre.pack()
+evalCV.pack()
+
+fenetre.mainloop()
 
