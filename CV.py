@@ -9,7 +9,7 @@ import os
 import math
 from tika import parser
 from tkinter import *
-path = r"C:\Users\Yakiimo\Desktop\Hackathon CV\CV\Resume&Job_Description\Original_Resumes"
+path = r"C:\Users\edinh\Desktop\CV\Resume&Job_Description\Original_Resumes\Administration\CDIB HK - Office Manager"
 dirs = os.listdir(path)
 
 excludedWords = ["or", "and", "with", "from", "of", "any", "to", "for", "-", "by", 
@@ -33,9 +33,19 @@ def scanCV(dirs) :
             raw = parser.from_file(path + "\\" + file)
             text = raw['content'].lower().split()
             countWords(text)
+    
+    updateKeyWords()
+    valeurMax = 1
+    for poids in keyWords.values() :
+        if poids > valeurMax :
+            valeurMax = poids
+    print(valeurMax)        
+    for word in wordsCount.keys() :
+       wordsCount[word] = (wordsCount[word]/valeurMax)*100
 
 def countWords(text) :
-    '''Ajoute 1 a la valeur de la cle correspondante dans le dictionnaire ou cree la cle si inexistante'''
+    '''Ajoute 1 a la valeur de la cle correspondante dans le dictionnaire ou cree la cle si inexistante et mettre en 0 et 1'''
+    
     for word in text :
         if word in wordsCount.keys() :
             wordsCount[word]+=1
@@ -46,7 +56,7 @@ def updateKeyWords() :
     '''Met a jour la liste des mots cles s'ils sont apparus plus d'une fois et n'appartiennent pas a la liste des mots a exclure'''
     for word in wordsCount.keys() :
         if wordsCount[word] >= 10 and not word in excludedWords :
-            keyWords[word] = 0
+            keyWords[word] = wordsCount[word]
             
 def displayWordsOccurrences() :
     '''Affiche les mots tries selon leurs nombres d'apparition'''

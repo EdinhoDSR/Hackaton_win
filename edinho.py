@@ -8,6 +8,12 @@ import os
 import math
 from tika import parser
 
+parsed = parser.from_file(r"CV\Resume&Job_Description\Original_Resumes\Addleshaw_Treliza Li_Office Manager.pdf")
+CV_coupe = parsed["content"].split()
+print(CV_coupe)
+print(parsed["metadata"])
+
+
 def importance(dico,CV):
     
     note=0
@@ -20,12 +26,6 @@ def importance(dico,CV):
         note = note + math.log(CV_coupe.count(cle)*dico.get(cle,0)[0])
     return note 
 
-#for element in parsed["content"]:
-#    print(element)
-#print(parsed["content"][0:50])
-"""
-for element in os.listdir('C:/Users/alexandre/Desktop/CV/Resume&Job_Description/Original_Resumes/Administration/CDIB HK - Office Manager') :
-    parsed = tika.parser.from_file('C:/Users/alexandre/Desktop/CV/Resume&Job_Description/Original_Resumes/Administration/CDIB HK - Office Manager/' + element)
-    print(parsed["content"])
-"""
+
+
 #help("parser")
