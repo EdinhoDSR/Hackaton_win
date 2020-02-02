@@ -15,7 +15,7 @@ dirs = os.listdir(path)
 excludedWords = ["or", "and", "with", "from", "of", "any", "to", "for", "-", "by", 
                  "which", "as", "in", "on", "to", "–", "•", ":", "&", "a", ",", "an", 
                  "the", "then", "cvs", "we", "at","is", "are", "that", "be", "can", "this",
-                 "it", "our", "all", "", "etc.", "ltd"]
+                 "it", "our", "all", "", "etc.", "ltd", "pte", "|", "mar"]
 keyWords = {}
 wordsCount = {}
 
@@ -81,11 +81,24 @@ def getCVName(dirs) :
             cvList.append(file)
     return cvList
     
+def getMostImportantKeyWords() :
+    mostImportantKeyWords = {}
+    temp = sorted(wordsCount, key=wordsCount.get, reverse=True)
+    i = 0
+    for key in temp :
+        if key not in excludedWords :
+            mostImportantKeyWords[key] = wordsCount[key]
+            i+=1
+            if i == 10 :
+                break
+    return mostImportantKeyWords
+    
             
 scanCV(dirs)
 # print(wordsCount)
 updateKeyWords()
-print(keyWords)
+mostImportantKeyWords=getMostImportantKeyWords()
+print(mostImportantKeyWords)
 # displayWordsOccurrences()
 scores = getScores(dirs)
 for file in sorted(scores, key=scores.get, reverse=True):
@@ -95,8 +108,11 @@ for file in sorted(scores, key=scores.get, reverse=True):
 fenetre = Tk()
 fenetre.geometry("")
 
-titre = Label(fenetre, text = "Gestion des CVs", font=("Helvetica", "24", "bold"))
-titre.grid(row = 0, column = 8, pady = 10, columnspan = 3)
+menu = Frame(fenetre)
+menu.grid(row = 0, column = 1, rowspan = 8, padx = 20)
+
+titre = Label(menu, text = "Gestion des CVs", font=("Helvetica", "24", "bold"))
+titre.grid(row = 0, column = 0, pady = 10, columnspan = 3)
 
 
 def asset_cvs() :
@@ -107,8 +123,8 @@ def asset_cvs() :
     fenetre.after(1000, clear_message)
         
         
-evalCV = Button(fenetre, text = "Évaluer des CVs", command = asset_cvs, font=("Helvetica", "16", "bold"))
-evalCV.grid(row=3, column= 8, pady = 10, columnspan = 3)
+evalCV = Button(menu, text = "Évaluer des CVs", command = asset_cvs, font=("Helvetica", "16", "bold"))
+evalCV.grid(row=2, column= 0, pady = 10, columnspan = 3)
 
 '''
 scales_dict = {}
@@ -117,40 +133,58 @@ for word in keyWords :
     scales_dict[word]= Scale(fenetre, orient='horizontal', from_=0, to=10, resolution=0.1, tickinterval=2, length=350, label=word)
 '''
 
-keyWordsKeys = list(keyWords.keys())
+mostImportantKeyWordsKeys = list(mostImportantKeyWords.keys())
 scales = []
+deleteButtons = []
+lines = []
 j = 0
 
-for i in range (len(keyWords)) :
-    if i%9 == 0 :
-        j+=1
-    scale = Scale(fenetre, from_=0, to = 100, label = keyWordsKeys[i], orient='horizontal', font=("Helvetica", "12"))
-    scale.grid(row = 4+i%8, column = 4+j, padx = 10, pady = 5)
+for i in range (len(mostImportantKeyWords)) :
+    line = Frame(fenetre,borderwidth=1)
+    label = Label(line, text = mostImportantKeyWordsKeys[i], font=("Helvetica", "12"))
+    label.pack()
+    scale = Scale(line, from_=0, to = 100, orient='horizontal')
+    scale.set(mostImportantKeyWords[mostImportantKeyWordsKeys[i]])
+    scale.pack()
+    def deleteLine(i) :
+        del mostImportantKeyWords[mostImportantKeyWordsKeys[i]]
+        print(mostImportantKeyWords)
+        scales[i].destroy
+        scales.pop(i)
+        lines[i].destroy
+        lines.pop(i)
+    deleteButton = Button(line, text = "X", command = lambda i=i : deleteLine(i), fg = "red")
+    deleteButton.pack()
+    lines.append(line)
+    line.grid(row = i, column = 0)
     scales.append(scale)
+    deleteButtons.append(deleteButton)
     
 def change_scales() :
-    for i in range (len(keyWords)) :
-       keyWords[keyWordsKeys[i]] = scales[i].get()
-    print(keyWords)
+    for i in range (len(mostImportantKeyWords)) :
+       mostImportantKeyWords[mostImportantKeyWordsKeys[i]] = scales[i].get()
+    print(mostImportantKeyWords)
     message['text'] = "Coefficients modifiés !"
     fenetre.after(1000, clear_message)
     
 def clear_message() :
     message["text"] = ""
         
-submitScale = Button(fenetre, text="Valider", command=change_scales, font=("Helvetica", "16", "bold"))
-submitScale.grid(row = 18, column = 8, pady = 20, columnspan = 3)
+submitScale = Button(menu, text="Valider", command=change_scales, font=("Helvetica", "16", "bold"))
+submitScale.grid(row = 4, column = 0, pady = 20, columnspan = 3)
 
-message = Label(fenetre, text="", font=("Helvetica", "16", "bold"))
-message.grid(row = 20, column = 8, columnspan = 3, pady = 10)
+message = Label(menu, text="", font=("Helvetica", "16", "bold"))
+message.grid(row = 6, column = 0, columnspan = 3, pady = 10)
 
 scoreLabels = []
 r = 0
 for file in getCVName(dirs) :
-    scoreLabel = Label(fenetre, text= file + "\t\t" + str(scores[file]), font=("Helvetica", "12"))
-    scoreLabel.grid(row = r, column = 15, padx = 10, pady = 5)
+    scoreLabel = Label(menu, text = "", font=("Helvetica", "12"))
+    scoreLabel.grid(row = r, column = 3, padx = 10, pady = 5)
     scoreLabels.append(scoreLabel)
     r+=1
+    
+# text= file + " " + str(scores[file])
 
 
 '''
