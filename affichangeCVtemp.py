@@ -8,16 +8,24 @@ import os
 import math
 from tika import parser
 from tkinter import *
+from tkinter.filedialog import askdirectory
+from tkinter.messagebox import showerror
 global path
-dirs = os.listdir(path)
 
 excludedWords = ["or", "and", "with", "from", "of", "any", "to", "for", "-", "by", 
                  "which", "as", "in", "on", "to", "–", "•", ":", "&", "a", ",", "an", 
                  "the", "then", "cvs", "we", "at","is", "are", "that", "be", "can", "this",
-                 "it", "our", "all", "", "etc.", "ltd", "pte", "|", "mar"]
+                 "it", "our", "all", "", "etc.", "ltd", "pte", "|", "mar",""]
 keyWords = {}
 wordsCount = {}
-
+def asset_cvs() :
+    scores = getRealScores(os.listdir(path))
+    scoresKeys = list(scores.keys())
+    for i in range (len(scoresKeys)) :
+        scoreLabels[i].config(text = scoresKeys[i] + "    " + str(scores[scoresKeys[i]]))
+    message['text'] = "CVs évalués !"
+    fenetre.after(1000, clear_message)
+        
 def countCV(dirs) :
     count = 0
     for file in dirs :
@@ -227,8 +235,6 @@ global nbCoeffs
 global tableau
 nbCoeffs = 10
 mostImportantKeyWords = {}
-mostImportantKeyWords["mot1" ] = 2
-mostImportantKeyWords["mot2" ] = 3
 
 def afficherCoefficient(frame,string,double,i):
         if string not in mostImportantKeyWords:
@@ -252,6 +258,7 @@ def destruction(ligne,nom):
     print(mostImportantKeyWords)
     ligne.destroy()
 def demanderPath():
+    global path
     path = askdirectory()
     labelPath.config(text=path)
     importerDico()
@@ -302,7 +309,8 @@ tableau.pack()
 
 bouton=Button(mainCadreGauche, text="+",command=demanderNouveauMot)
 bouton.pack(side=BOTTOM,padx=15)
-
+evalCV = Button(fenetre, text = "Évaluer des CVs", command = asset_cvs, font=("Helvetica", "16", "bold"))
+evalCV.pack(side=RIGHT)
 mainCadreDroit = Frame(fenetre, width=768, height=576, borderwidth=1) #le cadre principal de droite
 mainCadreDroit.pack(side=RIGHT)
 fenetre.mainloop()
@@ -310,10 +318,13 @@ fenetre.mainloop()
 def importerDico():
     global tableau
     j=0
-    scanCV(dirs)
+    scanCV(os.listdir(path))
     updateKeyWords()
     mostImportantKeyWords=getMostImportantKeyWords()
-    scores = getScores(dirs)
+    scores = getScores(os.listdir(path))
     for i in mostImportantKeyWords:
         afficherCoefficient(tableau,i,mostImportantKeyWords.get(i),j)
         j=j+1
+
+
+        
