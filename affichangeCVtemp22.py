@@ -25,7 +25,7 @@ def asset_cvs() :
     scoresKeys = sorted(scores, key=scores.get, reverse=True)
     for i in range (len(scoresKeys)) :
         scoreLabels[i].config(text = scoresKeys[i] + "    " + str(scores[scoresKeys[i]]))
-    #augustin()
+    augustin()
 
         
 def countCV(dirs) :
@@ -264,12 +264,6 @@ def demanderPath():
     global path
     path = askdirectory()
     labelPath.config(text=path)
-    r = 7
-    for file in getCVName(os.listdir(path)) :
-        scoreLabel = Label(mainCadreDroit, text = "", font=("Helvetica", "12"))
-        scoreLabel.grid(row = r, column = 3, padx = 10, pady = 5)
-        scoreLabels.append(scoreLabel)
-        r+=1
     importerDico()
     return 
 #entrer une donnée
@@ -323,8 +317,13 @@ bouton.pack(side=BOTTOM,padx=15)
 evalCV = Button(mainCadreGauche, text = "Évaluer des CVs", command = asset_cvs, font=("Helvetica", "16", "bold"))
 evalCV.pack(side=RIGHT)
 mainCadreDroit = Frame(fenetre, width=768, height=576, borderwidth=1) #le cadre principal de droite
-global scoreLabels 
-
+scoreLabels = []
+r = 7
+for file in getCVName(os.listdir(path)) :
+    scoreLabel = Label(mainCadreDroit, text = "", font=("Helvetica", "12"))
+    scoreLabel.grid(row = r, column = 3, padx = 10, pady = 5)
+    scoreLabels.append(scoreLabel)
+    r+=1
 mainCadreDroit.pack(side=RIGHT)
 
 
@@ -375,7 +374,7 @@ def constructor_bouton(element):
 i = 0
 class Example(Frame):
     def __init__(self, parent):
-        fenetre = Frame.__init__(self, parent)
+        Frame.__init__(self, parent)
         text = Text(self, wrap="none")
         vsb = Scrollbar(orient="vertical", command=text.yview)
         text.configure(yscrollcommand=vsb.set)
@@ -394,8 +393,8 @@ class Example(Frame):
             text.window_create("end", window=label)
             text.insert("end", "\n\n")
         text.configure(state="disabled")
-        
 def augustin():
-    Example(fenetre).pack(fill="both", expand=True)
-
+    fenetre2: Tk = Tk()
+    Example(fenetre2).pack(fill="both", expand=True)
+    fenetre2.mainloop()
 fenetre.mainloop()
