@@ -325,6 +325,61 @@ def importerDico():
     for i in mostImportantKeyWords:
         afficherCoefficient(tableau,i,mostImportantKeyWords.get(i),j)
         j=j+1
+        
+keyWordsusable = []
+
+for i in keyWords.keys():
+    if keyWords[i][0] > 140:
+        print(i)
+        keyWordsusable.append(i)
+print(keyWordsusable)
+
+def simplifierCVKeyWords(textCV):
+    textCV = textCV['content'].split("\n")
+    chaine = str()
+    for i in textCV:
+        len = sum(j.isalpha() for j in i)
+        for keyword in keyWordsusable:
+            if i.find(keyword) != -1:
+                chaine += i
+                chaine += "\n"
+                break
+    return chaine
+
+
+
+def ouvrirpdf(name):
+    webbrowser.open_new(r'C:\Users/augus/PycharmProjects/hackathon/CVs/' + name)
+
+
+def constructor_bouton(element):
+    b = Button(fenetre, text= element, command = lambda element=element: ouvrirpdf(element))
+    return b
+
+i = 0
+class Example(Frame):
+    def __init__(self, parent):
+        Frame.__init__(self, parent)
+        text = Text(self, wrap="none")
+        vsb = Scrollbar(orient="vertical", command=text.yview)
+        text.configure(yscrollcommand=vsb.set)
+        vsb.pack(side="right", fill="y")
+        text.pack(fill="both", expand=True)
+
+        for element in os.listdir(r'C:\Users/augus/PycharmProjects/hackathon/CVs'):
+            parsed = parser.from_file(r'C:\Users/augus/PycharmProjects/hackathon/CVs/' + element)
+            b = constructor_bouton(element)
+            label = Label(fenetre, text=simplifierCVKeyWords(parsed))
+            text.window_create("end", window=b)
+            text.insert("end", "\n")
+            text.window_create("end", window=label)
+            text.insert("end", "\n\n")
+        text.configure(state="disabled")
+
+fenetre: Tk = Tk()
+Example(fenetre).pack(fill="both", expand=True)
+fenetre.mainloop()
+
 
 
         
