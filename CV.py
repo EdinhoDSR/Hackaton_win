@@ -63,6 +63,15 @@ def importance(text):
         score = score + math.log(text.count(word)*keyWords.get(word,0))
     return score
 
+def highImportance(text):
+    '''Calcule le score d'un CV en fonction des mots trouves a l'interieur'''
+    score=0
+    for word in mostImportantKeyWords.keys(): #pour chaque mot du dico des mots-cles, recuperer l'occurrrence dans le cv, le multiplier par ln(la valeur) et ajouter à la note
+        if mostImportantKeyWords.get(word,0) == 0 or text.count(word) == 0:
+            continue
+        score = score + math.log(text.count(word)*mostImportantKeyWords.get(word,0))
+    return score
+
 def getScores(dirs):
     '''Calcule les scores de tous les CV'''
     scores = {}
@@ -71,6 +80,16 @@ def getScores(dirs):
             raw = parser.from_file(path + "\\" + file)
             text = raw['content'].lower().split()
             scores[file] = importance(text)
+    return scores
+
+def getRealScores(dirs):
+    '''Calcule les scores de tous les CV'''
+    scores = {}
+    for file in dirs :
+        if "pdf" in file :     
+            raw = parser.from_file(path + "\\" + file)
+            text = raw['content'].lower().split()
+            scores[file] = highImportance(text)
     return scores
 
 def getCVName(dirs) :
@@ -116,9 +135,10 @@ titre.grid(row = 0, column = 0, pady = 10, columnspan = 3)
 
 
 def asset_cvs() :
-    scores = getScores(dirs)
-    for file in sorted(scores, key=scores.get, reverse=True):
-        print(file + "\t\t" + str(scores[file]))
+    scores = getRealScores(dirs)
+    scoresKeys = list(scores.keys())
+    for i in range (len(scoresKeys)) :
+        scoreLabels[i].config(text = scoresKeys[i] + "    " + str(scores[scoresKeys[i]]))
     message['text'] = "CVs évalués !"
     fenetre.after(1000, clear_message)
         
@@ -150,10 +170,10 @@ for i in range (len(mostImportantKeyWords)) :
         del mostImportantKeyWords[mostImportantKeyWordsKeys[i]]
         print(mostImportantKeyWords)
         scales[i].destroy
-        scales.pop(i)
+        print(scales.pop(i))
         lines[i].destroy
-        lines.pop(i)
-    deleteButton = Button(line, text = "X", command = lambda i=i : deleteLine(i), fg = "red")
+        print(lines.pop(i))
+    deleteButton = Button(line, text = "X", command = lambda i=i: deleteLine(i), fg = "red")
     deleteButton.pack()
     lines.append(line)
     line.grid(row = i, column = 0)
@@ -171,13 +191,13 @@ def clear_message() :
     message["text"] = ""
         
 submitScale = Button(menu, text="Valider", command=change_scales, font=("Helvetica", "16", "bold"))
-submitScale.grid(row = 4, column = 0, pady = 20, columnspan = 3)
+submitScale.grid(row = 4, column = 0, pady = 20, columnspan=3)
 
 message = Label(menu, text="", font=("Helvetica", "16", "bold"))
 message.grid(row = 6, column = 0, columnspan = 3, pady = 10)
 
 scoreLabels = []
-r = 0
+r = 7
 for file in getCVName(dirs) :
     scoreLabel = Label(menu, text = "", font=("Helvetica", "12"))
     scoreLabel.grid(row = r, column = 3, padx = 10, pady = 5)
