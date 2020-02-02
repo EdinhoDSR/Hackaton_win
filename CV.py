@@ -15,7 +15,7 @@ dirs = os.listdir(path)
 excludedWords = ["or", "and", "with", "from", "of", "any", "to", "for", "-", "by", 
                  "which", "as", "in", "on", "to", "–", "•", ":", "&", "a", ",", "an", 
                  "the", "then", "cvs", "we", "at","is", "are", "that", "be", "can", "this",
-                 "it", "our", "all", ""]
+                 "it", "our", "all", "", "etc.", "ltd"]
 keyWords = {}
 wordsCount = {}
 
@@ -71,8 +71,15 @@ def getScores(dirs):
             raw = parser.from_file(path + "\\" + file)
             text = raw['content'].lower().split()
             scores[file] = importance(text)
-    for file in sorted(scores, key=scores.get, reverse=True):
-        print(file + "\t\t" + str(scores[file]))
+    return scores
+
+def getCVName(dirs) :
+    '''Calcule les scores de tous les CV'''
+    cvList  = []
+    for file in dirs :
+        if "pdf" in file : 
+            cvList.append(file)
+    return cvList
     
             
 scanCV(dirs)
@@ -80,25 +87,85 @@ scanCV(dirs)
 updateKeyWords()
 print(keyWords)
 # displayWordsOccurrences()
-getScores(dirs)
+scores = getScores(dirs)
+for file in sorted(scores, key=scores.get, reverse=True):
+        print(file + "\t\t" + str(scores[file]))
 
 
 fenetre = Tk()
+fenetre.geometry("")
 
-titre = Label(fenetre, text = "Gestion des CVs")
-evalCV = Button(fenetre, text = "Évaluer des CVs")
+titre = Label(fenetre, text = "Gestion des CVs", font=("Helvetica", "24", "bold"))
+titre.grid(row = 0, column = 8, pady = 10, columnspan = 3)
+
+
+def asset_cvs() :
+    scores = getScores(dirs)
+    for file in sorted(scores, key=scores.get, reverse=True):
+        print(file + "\t\t" + str(scores[file]))
+    message['text'] = "CVs évalués !"
+    fenetre.after(1000, clear_message)
+        
+        
+evalCV = Button(fenetre, text = "Évaluer des CVs", command = asset_cvs, font=("Helvetica", "16", "bold"))
+evalCV.grid(row=3, column= 8, pady = 10, columnspan = 3)
+
+'''
 scales_dict = {}
 
 for word in keyWords :
-    scales_dict[word]= Scale(fenetre, orient='horizontal', from_=0, to=10,
-      resolution=0.1, tickinterval=2, length=350, variable = word+"_var",
-      label=word, command = lambda word=word : keyWords[word] = word+"_var")
+    scales_dict[word]= Scale(fenetre, orient='horizontal', from_=0, to=10, resolution=0.1, tickinterval=2, length=350, label=word)
+'''
+
+keyWordsKeys = list(keyWords.keys())
+scales = []
+j = 0
+
+for i in range (len(keyWords)) :
+    if i%9 == 0 :
+        j+=1
+    scale = Scale(fenetre, from_=0, to = 100, label = keyWordsKeys[i], orient='horizontal', font=("Helvetica", "12"))
+    scale.grid(row = 4+i%8, column = 4+j, padx = 10, pady = 5)
+    scales.append(scale)
     
-for scale in scales_dict :
-    scale.pack()
+def change_scales() :
+    for i in range (len(keyWords)) :
+       keyWords[keyWordsKeys[i]] = scales[i].get()
+    print(keyWords)
+    message['text'] = "Coefficients modifiés !"
+    fenetre.after(1000, clear_message)
     
-titre.pack()
-evalCV.pack()
+def clear_message() :
+    message["text"] = ""
+        
+submitScale = Button(fenetre, text="Valider", command=change_scales, font=("Helvetica", "16", "bold"))
+submitScale.grid(row = 18, column = 8, pady = 20, columnspan = 3)
+
+message = Label(fenetre, text="", font=("Helvetica", "16", "bold"))
+message.grid(row = 20, column = 8, columnspan = 3, pady = 10)
+
+scoreLabels = []
+r = 0
+for file in getCVName(dirs) :
+    scoreLabel = Label(fenetre, text= file + "\t\t" + str(scores[file]), font=("Helvetica", "12"))
+    scoreLabel.grid(row = r, column = 15, padx = 10, pady = 5)
+    scoreLabels.append(scoreLabel)
+    r+=1
+
+
+'''
+for word in scales_dict :
+    def changeCoefficient() :
+        keyWords[word] = scales_dict[word].get()
+        print(word)
+        print(keyWords[word])
+        print(scales_dict[word].get())
+        print(keyWords[word])
+    scales_dict[word].config(command=changeCoefficient)
+    scales_dict[word].grid(row = 2, column = 2)
+'''
+    
+
 
 fenetre.mainloop()
 
